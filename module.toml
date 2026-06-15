@@ -1,0 +1,38 @@
+[module]
+id           = "keestore"
+display_name = "Keestore"
+version      = "0.1.0"
+description  = "Gestionnaire de mots de passe — coffre KeePass 4 (.kdbx) chiffré côté client"
+author       = "Kubuno Contributors"
+license      = "AGPL-3.0"
+homepage_url = "https://github.com/kubuno/kubuno"
+runtime      = "rust"
+dependencies = []
+settings_path = "/keestore/settings"
+
+[process]
+entrypoint = "kubuno-keestore"
+args       = []
+
+[server]
+host = "127.0.0.1"
+port = 3114
+
+[routes]
+patterns = [
+    { method = "*", path = "/*" },
+]
+
+[[sidebar_items]]
+id       = "keestore"
+label    = "Keestore"
+icon     = "KeyRound"
+path     = "/keestore"
+position = 60
+section  = "main"
+
+[events]
+subscribed = [
+    "UserDeleted",
+]
+publishes = []
