@@ -1,6 +1,6 @@
 [package]
 name        = "kubuno-keestore"
-version     = "0.1.0"
+version     = "0.1.0-alpha"
 edition     = "2021"
 description = "Kubuno Keestore — gestionnaire de mots de passe KeePass 4"
 license     = "AGPL-3.0"
@@ -46,7 +46,7 @@ kubuno-storage     = { workspace = true }
 [workspace]
 
 [workspace.package]
-version      = "0.1.0"
+version      = "0.1.0-alpha"
 edition      = "2021"
 authors      = ["Kubuno Contributors"]
 license      = "AGPL-3.0"
