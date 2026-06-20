@@ -388,7 +388,7 @@ function EntryDetail({ entry, onClose }: { entry: Entry; onClose: () => void }) 
             <p className="text-xs text-text-tertiary truncate">{entry.groupPath}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-surface-2 text-text-tertiary hover:text-text-primary">
+        <button onClick={onClose} className="p-1 rounded hover:bg-surface-2 text-text-tertiary hover:text-text-primary no-print">
           <X size={16} />
         </button>
       </div>
@@ -404,7 +404,9 @@ function EntryDetail({ entry, onClose }: { entry: Entry; onClose: () => void }) 
             <label className="flex items-center gap-1.5 text-xs font-medium text-text-secondary mb-1.5">
               <Lock size={14} /> {t('kee_field_password')}
             </label>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-1 border border-border">
+            {/* Sécurité : le mot de passe (en clair si révélé) ne doit JAMAIS être
+                imprimé → la boîte de valeur est entièrement non imprimable. */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-1 border border-border no-print">
               <span className="flex-1 font-mono text-sm text-text-primary select-all">
                 {showPwd ? entry.password : '•'.repeat(Math.min(entry.password.length, 20))}
               </span>
@@ -413,9 +415,10 @@ function EntryDetail({ entry, onClose }: { entry: Entry; onClose: () => void }) 
               </button>
               <CopyBtn value={entry.password} title={t('kee_copy_password')} />
             </div>
+            <span className="print-only text-sm text-text-tertiary italic">{'••••••••'}</span>
 
             {/* HIBP */}
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-2 flex items-center gap-2 no-print">
               <button
                 onClick={checkHibp}
                 disabled={checking}
@@ -518,12 +521,28 @@ function EntryRow({ entry, selected, onClick }: {
 
 // ── Unlocked vault view ───────────────────────────────────────────────────────
 
+// matchMedia (pas `md:`) : les variantes responsives d'un module qui annulent une
+// classe de base courante (flex-col→md:flex-row, w-full→md:w-[280px]) sont écrasées
+// par l'utilitaire de base du host (couche utilities > kubuno-module).
+function useIsMobile(): boolean {
+  const [m, setM] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const on = () => setM(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return m
+}
+
 function VaultView({
   entries, onLock, status,
 }: {
   entries: Entry[]; onLock: () => void; status: VaultStatus
 }) {
   const { t, i18n } = useTranslation('keestore')
+  const isMobile = useIsMobile()
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<Entry | null>(null)
   const [group,    setGroup]    = useState<string | null>(null)
@@ -581,9 +600,9 @@ function VaultView({
         />
       </>}
     >
-    <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
-      {/* Left — groups + entries */}
-      <div className="flex flex-col border-r border-border" style={{ width: 280 }}>
+    <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 min-w-0 min-h-0 overflow-hidden`}>
+      {/* Left — groups + entries (pleine largeur sur mobile, 280px sur desktop) */}
+      <div className={`flex flex-col border-border flex-shrink-0 ${isMobile ? 'border-b w-full max-h-[45%]' : 'border-r w-[280px]'}`}>
         {/* Toolbar — recherche d'entrées (la recherche globale est dans la topbar) */}
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
           <div className="flex-1 relative">
