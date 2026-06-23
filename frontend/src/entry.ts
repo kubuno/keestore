@@ -11,6 +11,7 @@ import {
   RouteRegistry,
   WaffleAppRegistry,
   FaviconRegistry,
+  ModuleSettingsRegistry,
   useSidebarStore,
   SDK_VERSION,
 } from '@kubuno/sdk'
@@ -32,8 +33,13 @@ export function register() {
     routePrefix: '/keestore',
   })
 
-  // Routes
-  const KeeStorePage = lazy(() => import('./KeeStorePage'))
+  // The header gear button opens the per-user Keestore settings while in /keestore.
+  ModuleSettingsRegistry.register('keestore')
 
-  RouteRegistry.register('keestore', KeeStorePage)
+  // Routes
+  const KeeStorePage         = lazy(() => import('./KeeStorePage'))
+  const KeeStoreSettingsPage = lazy(() => import('./KeeStoreSettingsPage'))
+
+  RouteRegistry.register('keestore',          KeeStorePage)
+  RouteRegistry.register('keestore/settings', KeeStoreSettingsPage)
 }
