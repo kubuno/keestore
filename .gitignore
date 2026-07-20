@@ -50,3 +50,6 @@ nohup.out
 # nécessaire pour compiler sans base de données en CI), migrations/, themes/, man/
 
 node_modules
+
+# TypeScript — état de build incrémental
+*.tsbuildinfo

@@ -37,6 +37,16 @@ cd frontend && npm ci && npm run build     # → dist/{entry.js, entry.css}
 bash build_deb.sh                          # → dist/kubuno-keestore_*.deb
 ```
 
+Native packages for other platforms are built the same way — each one lays the module out exactly like the `.deb`, so the core discovers it identically:
+
+```bash
+bash build_rpm.sh        # Fedora / RHEL / openSUSE  → dist/kubuno-keestore-*.rpm
+bash build_windows.sh    # Windows installer (NSIS)  → dist/kubuno-keestore-setup-*-x64.exe
+bash build_macos.sh      # macOS (run on a Mac)      → dist/kubuno-keestore-*.pkg
+```
+
+All of these are also produced by CI and attached to the GitHub Release on every `v*` tag.
+
 > Shared dependencies come from Kubuno — no `kubuno/core` checkout required:
 > - **Rust** — shared crates via tagged git dependencies on `kubuno/core`.
 > - **Frontend** — `@kubuno/sdk`, `@kubuno/ui`, `@kubuno/drive` from the `@kubuno` npm scope.
