@@ -146,12 +146,14 @@ pub async fn get_status(
             sync_version:     vault.sync_version,
             file_size_bytes:  vault.file_size_bytes,
             last_modified_at: vault.last_modified_at,
+            file_hash:        vault.file_hash_sha256,
         })),
         Err(KeeStoreError::VaultNotFound) => Ok(Json(VaultStatus {
             exists:           false,
             sync_version:     0,
             file_size_bytes:  0,
             last_modified_at: None,
+            file_hash:        None,
         })),
         Err(e) => Err(e),
     }

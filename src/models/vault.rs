@@ -24,6 +24,9 @@ pub struct VaultStatus {
     pub sync_version:     i64,
     pub file_size_bytes:  i64,
     pub last_modified_at: Option<DateTime<Utc>>,
+    /// SHA-256 of the stored blob — lets a local-first daemon compare integrity
+    /// (and decide pull vs. push) without downloading the whole vault.
+    pub file_hash:        Option<String>,
 }
 
 #[derive(Debug, Serialize)]
