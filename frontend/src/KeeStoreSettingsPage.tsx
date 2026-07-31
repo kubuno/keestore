@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ExternalLink, Check, Settings } from 'lucide-react'
-import { Toggle, Button, Radio } from '@ui'
+import { Toggle, Button, Radio, useSaveShortcut} from '@ui'
 import KeeStoreLogo from './KeeStoreLogo'
 import { useModulePrefs } from './userPrefs'
 
@@ -12,7 +12,9 @@ import { useModulePrefs } from './userPrefs'
 // reads, displays, logs or persists any vault password or secret. The vault
 // itself is decrypted client-side and never leaves the device unencrypted.
 
-interface KeestorePrefs {
+// `type`, not `interface`: only a type alias gets the implicit index signature
+// that `useModulePrefs<T extends Record<string, unknown>>` requires.
+type KeestorePrefs = {
   autoLockMin:   string   // '1' | '5' | '15' — auto-lock idle delay (minutes)
   genLength:     string   // '12' | '16' | '20' | '32' — default generator length
   maskPasswords: boolean  // hide passwords by default in the list
@@ -65,6 +67,9 @@ function PreferencesTab() {
 
   const set = <K extends keyof KeestorePrefs>(key: K, value: KeestorePrefs[K]) =>
     setPrefs(p => ({ ...p, [key]: value }))
+
+  // Ctrl+S saves immediately (disabled while a save is in flight).
+  useSaveShortcut(() => { void save() }, !busy)
 
   const save = async () => {
     setBusy(true)
