@@ -31,6 +31,58 @@ path     = "/keestore"
 position = 60
 section  = "main"
 
+# Admin console sub-menu (Modules ▸ Keestore). Keestore is zero-knowledge: the
+# vault is encrypted client-side, so generation, complexity, lockout, attempts and
+# sharing cannot be enforced server-side and are deliberately absent. Only two
+# knobs act on server-visible behaviour. `id` is a stable, untranslated slug used
+# in the admin page URL.
+[[setting_groups]]
+id       = "vaults"
+label    = "Coffres"
+icon     = "Shield"
+position = 10
+
+# Breach checking is the only feature of this module that can talk to the outside
+# world. It is k-anonymous (only a 5-character hash prefix is ever sent), and an
+# instance may point it at its own mirror so that nothing leaves the network.
+[[setting_groups]]
+id          = "breach"
+label       = "Vérification des fuites"
+icon        = "ShieldAlert"
+position    = 20
+description = "Contrôle des mots de passe compromis. Aucun mot de passe n'est transmis : seul un préfixe de 5 caractères de son empreinte est envoyé (k-anonymat)."
+
+[[settings]]
+key     = "max_kdbx_size_bytes"
+scope   = "global"
+group   = "vaults"
+type    = "int"
+default = 52428800
+min     = 1
+unit    = "octets"
+label   = "Taille maximale d'un coffre (octets)"
+description = "Plafond, en octets, d'un fichier .kdbx téléversé. Un envoi plus volumineux est refusé. Défaut : 52428800 (50 Mo)."
+
+[[settings]]
+key     = "enable_hibp"
+scope   = "global"
+group   = "breach"
+type    = "bool"
+default = true
+label   = "Vérification des fuites de mots de passe (Have I Been Pwned)"
+description = "Autorise le contrôle des mots de passe compromis via le proxy k-anonymity Have I Been Pwned. Aucun mot de passe n'est transmis en clair. Désactivé, la fonction est indisponible pour tous les utilisateurs."
+
+[[settings]]
+key         = "hibp_api_url"
+scope       = "global"
+group       = "breach"
+type        = "string"
+default     = "https://api.pwnedpasswords.com/range"
+depends_on  = "enable_hibp"
+advanced    = true
+label       = "Point d'accès du service de vérification"
+description = "Adresse du service « range » interrogé pour la vérification k-anonyme. Pointez-la vers un miroir auto-hébergé pour qu'aucune requête ne quitte votre réseau. Une valeur vide conserve le point d'accès configuré dans le fichier de configuration."
+
 [events]
 subscribed = [
     "UserDeleted",

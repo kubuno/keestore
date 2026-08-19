@@ -18,9 +18,26 @@ pub async fn hibp_proxy(
     Extension(_user): Extension<KeeStoreUser>,
     Path(prefix): Path<String>,
 ) -> Result<Response> {
+    // Breach checking is an instance-level feature the admin can turn off. When
+    // disabled, the route behaves as if it did not exist for this instance.
+    let cfg = state.instance();
+    if !cfg.enable_hibp {
+        return Err(KeeStoreError::Forbidden);
+    }
+
     let prefix = validate_prefix(&prefix)?;
 
-    let url = format!("{}/{}", state.settings.hibp.api_url, prefix);
+    // Prefer the admin-set endpoint, falling back to config.toml when it was
+    // never changed from the compiled default — an install that configured this
+    // the old way keeps working until an admin edits it in the console.
+    let d = crate::config::instance::InstanceConfig::default();
+    let api_url = if cfg.hibp_api_url == d.hibp_api_url {
+        state.settings.hibp.api_url.as_str()
+    } else {
+        cfg.hibp_api_url.as_str()
+    };
+
+    let url = format!("{api_url}/{prefix}");
     let resp = state.http
         .get(&url)
         .header("User-Agent", "KubunoKeestore/0.1")

@@ -60,7 +60,7 @@ pub async fn put_kdbx(
     if body.is_empty() {
         return Err(KeeStoreError::InvalidFile("Fichier vide".to_string()));
     }
-    if body.len() as u64 > state.settings.keestore.max_kdbx_size_bytes {
+    if body.len() as u64 > state.instance().max_kdbx_size_bytes {
         return Err(KeeStoreError::FileTooLarge);
     }
     if !is_kdbx_magic(&body) {
