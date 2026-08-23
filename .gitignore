@@ -53,3 +53,8 @@ node_modules
 
 # TypeScript — état de build incrémental
 *.tsbuildinfo
+
+# Claude Code working files (agent instructions & memory) — never published
+CLAUDE.md
+AGENTS.md
+.claude/
