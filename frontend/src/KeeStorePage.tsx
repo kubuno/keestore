@@ -1,3 +1,4 @@
+import { api, useConfirm, WorkspaceShell, WORKSPACE_LIGHT, formatDate } from '@kubuno/sdk'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as kdbxweb from 'kdbxweb'
@@ -7,14 +8,9 @@ import {
   ShieldCheck, RefreshCw, Trash2, CloudUpload, FolderOpen,
   AlertCircle, CheckCircle2, X,
 } from 'lucide-react'
-import { api } from '@kubuno/sdk'
 import { Button, Input } from '@ui'
 import { ConfirmDialog } from '@ui'
-import { useConfirm } from '@kubuno/sdk'
-import { getDateLocale } from '@kubuno/sdk'
-import { format } from 'date-fns'
 import { argon2d, argon2id } from 'hash-wasm'
-import { WorkspaceShell, WORKSPACE_LIGHT } from '@kubuno/sdk'
 
 // kdbxweb NE FOURNIT PAS d'implémentation Argon2 : les coffres KDBX4 utilisent Argon2
 // comme KDF, donc sans cet enregistrement `Kdbx.load` lève « argon2 not implemented ».
@@ -65,7 +61,7 @@ function fmtBytes(b: number) {
 
 function fmtDate(s: string | null, lng?: string) {
   if (!s) return '—'
-  return format(new Date(s), 'dd MMM yyyy HH:mm', { locale: getDateLocale(lng) })
+  return formatDate(new Date(s), 'dateTime')
 }
 
 function getField(entry: kdbxweb.KdbxEntry, key: string): string {

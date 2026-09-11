@@ -1,3 +1,4 @@
+import { RouteRegistry, WaffleAppRegistry, FaviconRegistry, ModuleSettingsRegistry, useSidebarStore, SDK_VERSION } from '@kubuno/sdk'
 /**
  * Point d'entrée du bundle MODULE keestore (la page /keestore), chargé à
  * l'exécution. Buildé séparément via `vite.module.config.ts` : les specifiers
@@ -7,14 +8,6 @@
  * `register()` ; `sdkVersion` permet de rejeter une incompatibilité de contrat.
  */
 import { lazy } from 'react'
-import {
-  RouteRegistry,
-  WaffleAppRegistry,
-  FaviconRegistry,
-  ModuleSettingsRegistry,
-  useSidebarStore,
-  SDK_VERSION,
-} from '@kubuno/sdk'
 import './index.css'
 import './i18n'
 import KeeStoreLogo from './KeeStoreLogo'
@@ -22,7 +15,7 @@ import KeeStoreLogo from './KeeStoreLogo'
 export const sdkVersion = SDK_VERSION
 
 export function register() {
-  FaviconRegistry.register('keestore', '/keestore-logo.svg')
+  FaviconRegistry.register('keestore', '/keestore-logo.png')
 
   WaffleAppRegistry.register('keestore', 'Keestore', [
     { id: 'keestore', label: 'Keestore', Icon: KeeStoreLogo, path: '/keestore' },
