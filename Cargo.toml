@@ -117,11 +117,7 @@ tracing-appender   = "0.2"
 tokio-util         = { version = "0.7", features = ["io"] }
 kubuno-storage     = { git = "https://github.com/kubuno/core", tag = "storage-v0.1.1", package = "kubuno-storage" }
 kubuno-seccomp     = { git = "https://github.com/kubuno/core", tag = "seccomp-v0.1.1", package = "kubuno-seccomp" }
-# TODO(release): swap for the tagged form once kubuno/core carries the tag —
-#   kubuno-db = { git = "https://github.com/kubuno/core", tag = "db-v0.1.0", package = "kubuno-db", default-features = false }
-# The path form only resolves inside the ~/projects/kubuno checkout; a module
-# must build standalone before it can be released.
-kubuno-db          = { path = "../core/crates/kubuno-db", default-features = false }
+kubuno-db          = { git = "https://github.com/kubuno/core", tag = "db-v0.1.0", package = "kubuno-db", default-features = false }
 
 # Erreurs
 thiserror = "1"

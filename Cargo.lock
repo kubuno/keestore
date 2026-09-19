@@ -1337,6 +1337,7 @@ dependencies = [
 [[package]]
 name = "kubuno-db"
 version = "0.1.0"
+source = "git+https://github.com/kubuno/core?tag=db-v0.1.0#28cc4f9e0d1a71611b30058cf881306ee55df696"
 dependencies = [
  "chrono",
  "serde",
