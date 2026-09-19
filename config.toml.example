@@ -15,6 +15,19 @@ internal_secret = "change_me"
 # Les paramètres sont injectés par le superviseur Kubuno via variables d'env.
 # Pour un démarrage hors superviseur, exporter manuellement :
 #   KUBUNO_DB_HOST, KUBUNO_DB_PORT, KUBUNO_DB_USER, KUBUNO_DB_PASSWORD, KUBUNO_DB_NAME
+#
+# Le MOTEUR est choisi à la compilation (features backend-postgres par défaut,
+# backend-mysql, backend-sqlite) : un binaire ne parle qu'à un seul moteur.
+#
+# [database]
+# # PostgreSQL / MySQL — hôte et identifiants (ou bien `url`)
+# host     = "127.0.0.1"
+# port     = 5432
+# user     = "kubuno"
+# password = "…"
+# database = "kubuno"
+# # SQLite — dossier du fichier `keestore.sqlite` (KUBUNO_DB_PATH)
+# path     = "/var/lib/kubuno/modules/keestore/db"
 
 [storage]
 backend    = "local"

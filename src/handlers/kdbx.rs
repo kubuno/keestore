@@ -10,7 +10,10 @@ use crate::{
     errors::{KeeStoreError, Result},
     middleware::KeeStoreUser,
     models::{VaultStatus, VaultSyncResponse},
-    services::vault_service::{get_vault_meta, is_kdbx_magic, kdbx_path, sha256_hex},
+    services::vault_service::{
+        delete_vault, get_vault_meta, is_kdbx_magic, kdbx_path, sha256_hex, sync_vault,
+        touch_last_accessed,
+    },
     state::AppState,
 };
 
@@ -21,12 +24,7 @@ pub async fn get_kdbx(
 ) -> Result<Response> {
     let vault = get_vault_meta(&user.id, &state.db).await?;
 
-    let _ = sqlx::query(
-        "UPDATE keestore.vaults SET last_accessed_at = NOW() WHERE owner_id = $1",
-    )
-    .bind(user.id)
-    .execute(&state.db)
-    .await;
+    touch_last_accessed(&state.db, user.id).await;
 
     let bytes = state.storage
         .get(&vault.kdbx_path)
@@ -91,28 +89,7 @@ pub async fn put_kdbx(
 
     state.storage.put(&path, body).await?;
 
-    use sqlx::Row;
-    let row = sqlx::query(
-        r#"INSERT INTO keestore.vaults
-           (owner_id, kdbx_path, file_size_bytes, sync_version,
-            file_hash_sha256, last_modified_at)
-           VALUES ($1, $2, $3, 1, $4, NOW())
-           ON CONFLICT (owner_id) DO UPDATE SET
-               kdbx_path        = EXCLUDED.kdbx_path,
-               file_size_bytes  = EXCLUDED.file_size_bytes,
-               sync_version     = keestore.vaults.sync_version + 1,
-               file_hash_sha256 = EXCLUDED.file_hash_sha256,
-               last_modified_at = NOW()
-           RETURNING sync_version"#,
-    )
-    .bind(user.id)
-    .bind(&path)
-    .bind(file_size)
-    .bind(&hash)
-    .fetch_one(&state.db)
-    .await?;
-
-    let sync_version: i64 = row.try_get("sync_version")?;
+    let sync_version = sync_vault(&state.db, user.id, &path, file_size, &hash).await?;
 
     Ok(Json(VaultSyncResponse {
         sync_version,
@@ -128,10 +105,7 @@ pub async fn delete_kdbx(
 ) -> Result<StatusCode> {
     let vault = get_vault_meta(&user.id, &state.db).await?;
     state.storage.delete(&vault.kdbx_path).await?;
-    sqlx::query("DELETE FROM keestore.vaults WHERE owner_id = $1")
-        .bind(user.id)
-        .execute(&state.db)
-        .await?;
+    delete_vault(&state.db, user.id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 

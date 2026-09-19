@@ -41,7 +41,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use serde_json::json;
-use sqlx::PgPool;
+use kubuno_db::{dialect, DbPool};
 use uuid::Uuid;
 
 use crate::state::AppState;
@@ -75,20 +75,26 @@ const CAT_CONTENT: &str = "content";
 /// Every byte-bearing query keestore runs, paired with the category it feeds.
 ///
 /// Each statement must return exactly `(owner uuid, bytes bigint, objects bigint)`
-/// and must only read keestore's own schema. A single entry today; the table
+/// and must only read keestore's own schema. A single entry today; the list
 /// exists so that adding a second one cannot quietly skip the guard tests below.
 ///
 /// The `GROUP BY` is not redundant with `owner_id`'s `UNIQUE` constraint: it is
 /// what makes the query keep returning one row per account if that constraint is
 /// ever relaxed to allow several vaults.
-const OWNED_QUERIES: &[(&str, &str)] = &[(
-    CAT_CONTENT,
-    "SELECT owner_id,
-            COALESCE(SUM(file_size_bytes), 0)::bigint,
-            COUNT(*)::bigint
-       FROM keestore.vaults
-      GROUP BY owner_id",
-)];
+///
+/// Built at run time rather than declared as a constant because the aggregates
+/// are spelled differently per engine: `SUM()` of a BIGINT is `numeric` on
+/// PostgreSQL and `DECIMAL` on MySQL, neither of which decodes into `i64`.
+fn owned_queries() -> Vec<(&'static str, String)> {
+    vec![(
+        CAT_CONTENT,
+        format!(
+            "SELECT owner_id, {bytes}, {objects} FROM keestore.vaults GROUP BY owner_id",
+            bytes = dialect::sum_bigint("file_size_bytes"),
+            objects = dialect::count_bigint("*"),
+        ),
+    )]
+}
 
 /// One `(account, category)` figure, as declared.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -106,21 +112,25 @@ struct Entry {
 /// that failed here is *retired* by the core until the next sync repairs it — the
 /// honest outcome, since publishing a stale figure as current state would be
 /// worse than publishing none.
-async fn collect(db: &PgPool) -> Vec<Entry> {
+async fn collect(db: &DbPool) -> Vec<Entry> {
     let mut acc: HashMap<(Uuid, &'static str), (i64, i64)> = HashMap::new();
 
-    for (category, sql) in OWNED_QUERIES {
-        match sqlx::query_as::<_, (Uuid, i64, i64)>(*sql).fetch_all(db).await {
+    for (category, sql) in owned_queries() {
+        let rows = match kubuno_db::query_as::<(Uuid, i64, i64)>(&sql) {
+            Ok(q) => q.fetch_all(db).await,
+            Err(e) => Err(e),
+        };
+        match rows {
             Ok(rows) => {
                 for (user_id, bytes, objects) in rows {
-                    let slot = acc.entry((user_id, *category)).or_insert((0, 0));
+                    let slot = acc.entry((user_id, category)).or_insert((0, 0));
                     slot.0 += bytes;
                     slot.1 += objects;
                 }
             }
             Err(e) => tracing::error!(
                 error = %e,
-                catégorie = *category,
+                catégorie = category,
                 "Recomptage de consommation échoué pour une requête — catégorie incomplète"
             ),
         }
@@ -296,7 +306,7 @@ mod tests {
     /// column would either bill the wrong person or bill several.
     #[test]
     fn every_query_groups_by_the_vault_owner() {
-        for (_, sql) in OWNED_QUERIES {
+        for (_, sql) in owned_queries() {
             assert!(
                 sql.to_lowercase().contains("group by owner_id"),
                 "requête sans GROUP BY owner_id — une ligne par compte est le contrat : {sql}"
@@ -309,7 +319,7 @@ mod tests {
     #[test]
     fn content_is_the_only_category() {
         use std::collections::BTreeSet;
-        let cats: BTreeSet<&str> = OWNED_QUERIES.iter().map(|(c, _)| *c).collect();
+        let cats: BTreeSet<&str> = owned_queries().iter().map(|(c, _)| *c).collect();
         assert_eq!(
             cats,
             BTreeSet::from([CAT_CONTENT]),
@@ -321,7 +331,7 @@ mod tests {
     /// violation and a double count waiting to happen.
     #[test]
     fn queries_only_read_the_keestore_schema() {
-        for (_, sql) in OWNED_QUERIES {
+        for (_, sql) in owned_queries() {
             let lowered = sql.to_lowercase();
             for foreign in ["drive.", "core.", "chat.", "office.", "mail."] {
                 assert!(
@@ -340,7 +350,7 @@ mod tests {
     /// never anything that describes what is inside.
     #[test]
     fn nothing_about_the_vaults_contents_is_read() {
-        for (_, sql) in OWNED_QUERIES {
+        for (_, sql) in owned_queries() {
             let lowered = sql.to_lowercase();
             for private in ["kdbx_path", "file_hash_sha256", "unlock_attempts"] {
                 assert!(

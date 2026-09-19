@@ -1,10 +1,9 @@
 use anyhow::{Context, Result};
 use clap::Parser;
-use kubuno_keestore::{config::Settings, router, state::AppState};
+use kubuno_keestore::{config::Settings, router, state::AppState, SCHEMA};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -161,34 +160,24 @@ async fn main() -> Result<()> {
     // Sécurité : interdire toute exécution de processus sur l’hôte (voir kubuno-seccomp).
     kubuno_seccomp::lock_down_process_execution("keestore");
 
-    // Pool PostgreSQL
-    let opts = settings.database.connect_options()?;
-    let pool = PgPoolOptions::new()
-        .max_connections(settings.database.max_connections)
-        .min_connections(settings.database.min_connections)
-        .acquire_timeout(settings.database.connect_timeout)
-        .connect_with(opts)
+    // Database pool. Which engine this is was decided at compile time by the
+    // `backend-*` feature; `connect` also creates the module's namespace
+    // (PostgreSQL schema, MySQL database, or the ATTACHed SQLite file).
+    let pool = kubuno_db::connect(&settings.database, SCHEMA)
         .await
-        .context("Connexion PostgreSQL")?;
+        .context("Connexion à la base de données")?;
 
     // Migrations
     if settings.database.run_migrations {
-        sqlx::query("CREATE SCHEMA IF NOT EXISTS keestore")
-            .execute(&pool)
-            .await
-            .context("Création du schéma keestore")?;
-
-        let migration_opts = settings.database.connect_options()?
-            .options([("search_path", "keestore,public")]);
-        let migration_pool = PgPoolOptions::new()
-            .max_connections(1)
-            .acquire_timeout(settings.database.connect_timeout)
-            .connect_with(migration_opts)
-            .await
-            .context("Pool de migration")?;
-
-        sqlx::migrate!("./migrations")
-            .run(&migration_pool)
+        let migrator = kubuno_db::migrations!(
+            "./migrations/postgres",
+            "./migrations/mysql",
+            "./migrations/sqlite",
+        );
+        // Keeps `_sqlx_migrations` inside the module's own namespace — the same
+        // table PostgreSQL already used through its search_path.
+        kubuno_db::pool::scope_migrator(migrator, SCHEMA)
+            .run(&pool)
             .await
             .context("Migrations")?;
     }
