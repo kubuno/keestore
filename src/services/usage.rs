@@ -110,7 +110,7 @@ async fn collect(db: &PgPool) -> Vec<Entry> {
     let mut acc: HashMap<(Uuid, &'static str), (i64, i64)> = HashMap::new();
 
     for (category, sql) in OWNED_QUERIES {
-        match sqlx::query_as::<_, (Uuid, i64, i64)>(sql).fetch_all(db).await {
+        match sqlx::query_as::<_, (Uuid, i64, i64)>(*sql).fetch_all(db).await {
             Ok(rows) => {
                 for (user_id, bytes, objects) in rows {
                     let slot = acc.entry((user_id, *category)).or_insert((0, 0));
