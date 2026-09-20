@@ -160,26 +160,25 @@ async fn main() -> Result<()> {
     // Sécurité : interdire toute exécution de processus sur l’hôte (voir kubuno-seccomp).
     kubuno_seccomp::lock_down_process_execution("keestore");
 
-    // Database pool. Which engine this is was decided at compile time by the
-    // `backend-*` feature; `connect` also creates the module's namespace
-    // (PostgreSQL schema, MySQL database, or the ATTACHed SQLite file).
+    // Database pool. The engine (PostgreSQL / MySQL / SQLite) is the
+    // administrator's choice in `[database] engine`, read at run time; `connect`
+    // also creates the module's namespace (PostgreSQL schema, MySQL database, or
+    // the ATTACHed SQLite file).
     let pool = kubuno_db::connect(&settings.database, SCHEMA)
         .await
         .context("Connexion à la base de données")?;
 
-    // Migrations
+    // Migrations: the set for the pool's engine, kept inside the module's own
+    // namespace (the table PostgreSQL already used through its search_path).
     if settings.database.run_migrations {
-        let migrator = kubuno_db::migrations!(
+        kubuno_db::migrations!(
             "./migrations/postgres",
             "./migrations/mysql",
             "./migrations/sqlite",
-        );
-        // Keeps `_sqlx_migrations` inside the module's own namespace — the same
-        // table PostgreSQL already used through its search_path.
-        kubuno_db::pool::scope_migrator(migrator, SCHEMA)
-            .run(&pool)
-            .await
-            .context("Migrations")?;
+        )
+        .run(&pool, SCHEMA)
+        .await
+        .context("Migrations")?;
     }
 
     // Storage

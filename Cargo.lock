@@ -1336,14 +1336,14 @@ dependencies = [
 
 [[package]]
 name = "kubuno-db"
-version = "0.1.0"
-source = "git+https://github.com/kubuno/core?tag=db-v0.1.0#28cc4f9e0d1a71611b30058cf881306ee55df696"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "serde",
  "serde_json",
  "sqlx",
  "thiserror 1.0.69",
+ "tokio",
  "tracing",
  "uuid",
 ]

@@ -41,7 +41,8 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use serde_json::json;
-use kubuno_db::{dialect, DbPool};
+use kubuno_db::dialect::Backend;
+use kubuno_db::DbPool;
 use uuid::Uuid;
 
 use crate::state::AppState;
@@ -85,13 +86,13 @@ const CAT_CONTENT: &str = "content";
 /// Built at run time rather than declared as a constant because the aggregates
 /// are spelled differently per engine: `SUM()` of a BIGINT is `numeric` on
 /// PostgreSQL and `DECIMAL` on MySQL, neither of which decodes into `i64`.
-fn owned_queries() -> Vec<(&'static str, String)> {
+fn owned_queries(backend: Backend) -> Vec<(&'static str, String)> {
     vec![(
         CAT_CONTENT,
         format!(
             "SELECT owner_id, {bytes}, {objects} FROM keestore.vaults GROUP BY owner_id",
-            bytes = dialect::sum_bigint("file_size_bytes"),
-            objects = dialect::count_bigint("*"),
+            bytes = backend.sum_bigint("file_size_bytes"),
+            objects = backend.count_bigint("*"),
         ),
     )]
 }
@@ -115,11 +116,8 @@ struct Entry {
 async fn collect(db: &DbPool) -> Vec<Entry> {
     let mut acc: HashMap<(Uuid, &'static str), (i64, i64)> = HashMap::new();
 
-    for (category, sql) in owned_queries() {
-        let rows = match kubuno_db::query_as::<(Uuid, i64, i64)>(&sql) {
-            Ok(q) => q.fetch_all(db).await,
-            Err(e) => Err(e),
-        };
+    for (category, sql) in owned_queries(db.backend()) {
+        let rows = db.fetch_all_as::<(Uuid, i64, i64)>(&sql, kubuno_db::params![]).await;
         match rows {
             Ok(rows) => {
                 for (user_id, bytes, objects) in rows {
@@ -306,7 +304,7 @@ mod tests {
     /// column would either bill the wrong person or bill several.
     #[test]
     fn every_query_groups_by_the_vault_owner() {
-        for (_, sql) in owned_queries() {
+        for (_, sql) in owned_queries(Backend::Postgres) {
             assert!(
                 sql.to_lowercase().contains("group by owner_id"),
                 "requête sans GROUP BY owner_id — une ligne par compte est le contrat : {sql}"
@@ -319,7 +317,7 @@ mod tests {
     #[test]
     fn content_is_the_only_category() {
         use std::collections::BTreeSet;
-        let cats: BTreeSet<&str> = owned_queries().iter().map(|(c, _)| *c).collect();
+        let cats: BTreeSet<&str> = owned_queries(Backend::Postgres).iter().map(|(c, _)| *c).collect();
         assert_eq!(
             cats,
             BTreeSet::from([CAT_CONTENT]),
@@ -331,7 +329,7 @@ mod tests {
     /// violation and a double count waiting to happen.
     #[test]
     fn queries_only_read_the_keestore_schema() {
-        for (_, sql) in owned_queries() {
+        for (_, sql) in owned_queries(Backend::Postgres) {
             let lowered = sql.to_lowercase();
             for foreign in ["drive.", "core.", "chat.", "office.", "mail."] {
                 assert!(
@@ -350,7 +348,7 @@ mod tests {
     /// never anything that describes what is inside.
     #[test]
     fn nothing_about_the_vaults_contents_is_read() {
-        for (_, sql) in owned_queries() {
+        for (_, sql) in owned_queries(Backend::Postgres) {
             let lowered = sql.to_lowercase();
             for private in ["kdbx_path", "file_hash_sha256", "unlock_attempts"] {
                 assert!(

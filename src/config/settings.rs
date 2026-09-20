@@ -64,6 +64,7 @@ impl Settings {
             .set_default("database.min_connections", 1u64)?
             .set_default("database.connect_timeout", 10u64)?
             .set_default("database.run_migrations", true)?
+            .set_default("database.engine", "postgres")?
             // SQLite only: where `<schema>.sqlite` lives.
             .set_default("database.path", "./data/db")?
             .set_default("storage.backend", "local")?
@@ -90,6 +91,7 @@ impl Settings {
             .set_override_option("database.password", std::env::var("KUBUNO_DB_PASSWORD").ok())?
             .set_override_option("database.database", std::env::var("KUBUNO_DB_NAME").ok())?
             .set_override_option("database.path",     std::env::var("KUBUNO_DB_PATH").ok())?
+            .set_override_option("database.engine",   std::env::var("KUBUNO_DB_ENGINE").ok())?
             .set_override_option("core.internal_secret", std::env::var("KUBUNO_INTERNAL_SECRET").ok())?
             .set_override_option("core.url",          std::env::var("KUBUNO_CORE_URL").ok())?;
 

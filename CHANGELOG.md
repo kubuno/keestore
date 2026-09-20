@@ -11,9 +11,9 @@ number at release time, and CI publishes that section as the GitHub Release note
 
 ### Added
 
-- **Keestore runs on MySQL/MariaDB and SQLite as well as PostgreSQL.** The
-  vault table is now described for each engine and the module picks the right
-  description when it is built. Everything a user does — upload, download,
+- **Keestore runs on MySQL/MariaDB and SQLite as well as PostgreSQL, chosen at
+  run time.** One build carries the three engines; the server picks one from
+  its configuration at start-up. Everything a user does — upload, download,
   version check, delete — behaves identically on the three.
 
 ### Changed
