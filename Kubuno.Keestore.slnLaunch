@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Keestore (Kubuno Core + browser)",
+    "Projects": [
+      {
+        "Path": "Kubuno.Keestore.Server.rsproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "frontend\\Kubuno.Keestore.Web.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
