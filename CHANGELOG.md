@@ -38,6 +38,12 @@ number at release time, and CI publishes that section as the GitHub Release note
 
 ### Security
 
+- **The signed-in user is now taken from the core's signed identity token only.** The module used to trust the
+  plain `X-Kubuno-User-Id` / `-Role` / `-Email` headers, so any process able to reach its local port could
+  act as any user, administrators included. It now accepts a request only with a valid `X-Kubuno-Auth` token
+  signed by the core with this module's own secret, for this module, and not expired (`kubuno-modauth`); the
+  plain headers are ignored. With no internal secret configured, every user request is refused. An unused, non-constant-time IPC guard was removed (the module has no IPC route).
+
 - **Security fixes from the shared database layer (kubuno-db 0.9.0).** The
   database password can no longer appear in a log through the debug output of
   the database settings.
