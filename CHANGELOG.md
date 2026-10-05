@@ -9,6 +9,11 @@ number at release time, and CI publishes that section as the GitHub Release note
 
 ## [Unreleased]
 
+### Fixed
+
+- **Files kept on the server's local storage are found again on Windows and under symlinked storage
+  roots** (shared storage layer updated to kubuno-storage 0.1.2).
+
 ## [0.1.9] - 2026-10-05
 
 ### Changed
