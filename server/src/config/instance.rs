@@ -2,7 +2,7 @@
 //! in the console.
 //!
 //! Declared by `module.toml`'s `[[settings]]`, stored in `core.settings`, and read
-//! back here through `/internal/modules/keestore/settings` — a module owns its own
+//! back here through `/internal/modules/keestore/settings` - a module owns its own
 //! schema and cannot read the core's tables, and a background worker has no user
 //! token for the public config route. The module is named in the URL so the read
 //! works whether the instance shares one master secret or a derived one per
@@ -38,7 +38,7 @@ pub struct InstanceConfig {
 impl Default for InstanceConfig {
     fn default() -> Self {
         Self {
-            // 50 MB — matches `keestore.max_kdbx_size_bytes` default in settings.rs.
+            // 50 MB - matches `keestore.max_kdbx_size_bytes` default in settings.rs.
             max_kdbx_size_bytes: 52_428_800,
             enable_hibp:         true,
             // Same default as `hibp.api_url` in settings.rs.

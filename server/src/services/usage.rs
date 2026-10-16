@@ -12,7 +12,7 @@
 //!
 //! The criterion is the platform's: **an account is billed for what it can free
 //! itself**. A vault is created by its owner, it is theirs alone
-//! (`vaults.owner_id` is `UNIQUE`), and deleting it frees exactly those bytes —
+//! (`vaults.owner_id` is `UNIQUE`), and deleting it frees exactly those bytes -
 //! so it is `content`, billed, with nothing else to declare. Keestore keeps no
 //! thumbnail, no index and no cache: there is nothing about an encrypted
 //! password database it could usefully derive.
@@ -21,7 +21,7 @@
 //!
 //! The vault is end-to-end encrypted and this reporter does not open it. It reads
 //! one integer column per account and sends a number. It carries no entry count,
-//! no title, no hash — an administrator learns that an account holds a vault of
+//! no title, no hash - an administrator learns that an account holds a vault of
 //! *n* bytes, which is the whole point of a storage breakdown and the entirety of
 //! what it is allowed to learn.
 //!
@@ -110,7 +110,7 @@ struct Entry {
 ///
 /// A failing query is logged and skipped rather than aborting the whole
 /// declaration. The declaration is still marked `full`, which means a category
-/// that failed here is *retired* by the core until the next sync repairs it — the
+/// that failed here is *retired* by the core until the next sync repairs it - the
 /// honest outcome, since publishing a stale figure as current state would be
 /// worse than publishing none.
 async fn collect(db: &DbPool) -> Vec<Entry> {
@@ -129,7 +129,7 @@ async fn collect(db: &DbPool) -> Vec<Entry> {
             Err(e) => tracing::error!(
                 error = %e,
                 catégorie = category,
-                "Recomptage de consommation échoué pour une requête — catégorie incomplète"
+                "Recomptage de consommation échoué pour une requête - catégorie incomplète"
             ),
         }
     }
@@ -144,7 +144,7 @@ async fn collect(db: &DbPool) -> Vec<Entry> {
         })
         .collect();
 
-    // Stable order so consecutive declarations chunk identically — a moving
+    // Stable order so consecutive declarations chunk identically - a moving
     // chunk boundary would make partial declarations retire different accounts
     // each time.
     entries.sort_by(|a, b| (a.user_id, a.category).cmp(&(b.user_id, b.category)));
@@ -201,7 +201,7 @@ async fn send(
     }
 
     // The status alone does not say which of several validations refused the
-    // declaration, and this runs unattended — a log line reading "HTTP 422" costs
+    // declaration, and this runs unattended - a log line reading "HTTP 422" costs
     // an afternoon the next time the contract shifts.
     let status = resp.status();
     let detail = resp.text().await.unwrap_or_default();
@@ -307,7 +307,7 @@ mod tests {
         for (_, sql) in owned_queries(Backend::Postgres) {
             assert!(
                 sql.to_lowercase().contains("group by owner_id"),
-                "requête sans GROUP BY owner_id — une ligne par compte est le contrat : {sql}"
+                "requête sans GROUP BY owner_id - une ligne par compte est le contrat : {sql}"
             );
         }
     }
@@ -353,7 +353,7 @@ mod tests {
             for private in ["kdbx_path", "file_hash_sha256", "unlock_attempts"] {
                 assert!(
                     !lowered.contains(private),
-                    "la requête lit « {private} » — une déclaration ne porte qu'une taille : {sql}"
+                    "la requête lit « {private} » - une déclaration ne porte qu'une taille : {sql}"
                 );
             }
         }

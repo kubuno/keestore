@@ -15,10 +15,10 @@ import { useModulePrefs } from './userPrefs'
 // `type`, not `interface`: only a type alias gets the implicit index signature
 // that `useModulePrefs<T extends Record<string, unknown>>` requires.
 type KeestorePrefs = {
-  autoLockMin:   string   // '1' | '5' | '15' — auto-lock idle delay (minutes)
-  genLength:     string   // '12' | '16' | '20' | '32' — default generator length
+  autoLockMin:   string   // '1' | '5' | '15' - auto-lock idle delay (minutes)
+  genLength:     string   // '12' | '16' | '20' | '32' - default generator length
   maskPasswords: boolean  // hide passwords by default in the list
-  clipboardSecs: string   // '0' | '15' | '30' | '60' — clear clipboard after N seconds
+  clipboardSecs: string   // '0' | '15' | '30' | '60' - clear clipboard after N seconds
   defaultView:   string   // 'list' | 'grid'
   sort:          string   // 'title' | 'username' | 'recent'
 }

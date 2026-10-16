@@ -2,7 +2,7 @@
 id           = "keestore"
 display_name = "Keestore"
 version      = "0.1.9"
-description  = "Gestionnaire de mots de passe — coffre KeePass 4 (.kdbx) chiffré côté client"
+description  = "Gestionnaire de mots de passe - coffre KeePass 4 (.kdbx) chiffré côté client"
 author       = "Kubuno Contributors"
 license      = "AGPL-3.0"
 homepage_url = "https://github.com/kubuno/kubuno"

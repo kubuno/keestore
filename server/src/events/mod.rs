@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 ///
 /// This goes over the core's internal interface rather than a database
 /// notification: `LISTEN/NOTIFY` exists only on PostgreSQL, and the core's
-/// path is the sturdier one anyway — it queues the event, so nothing is lost
+/// path is the sturdier one anyway - it queues the event, so nothing is lost
 /// while a subscriber restarts.
 pub async fn publish_event(
     client:          &Client,

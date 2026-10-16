@@ -17,7 +17,7 @@ use crate::{
     state::AppState,
 };
 
-/// GET /kdbx — télécharger le fichier .kdbx
+/// GET /kdbx - télécharger le fichier .kdbx
 pub async fn get_kdbx(
     State(state): State<AppState>,
     Extension(user): Extension<KeeStoreUser>,
@@ -48,7 +48,7 @@ pub async fn get_kdbx(
     Ok((StatusCode::OK, headers, bytes).into_response())
 }
 
-/// PUT /kdbx — uploader le fichier .kdbx modifié
+/// PUT /kdbx - uploader le fichier .kdbx modifié
 pub async fn put_kdbx(
     State(state): State<AppState>,
     Extension(user): Extension<KeeStoreUser>,
@@ -63,7 +63,7 @@ pub async fn put_kdbx(
     }
     if !is_kdbx_magic(&body) {
         return Err(KeeStoreError::InvalidFile(
-            "Signature KDBX invalide — le fichier n'est pas un .kdbx valide".to_string(),
+            "Signature KDBX invalide - le fichier n'est pas un .kdbx valide".to_string(),
         ));
     }
 
@@ -98,7 +98,7 @@ pub async fn put_kdbx(
     }))
 }
 
-/// DELETE /kdbx — supprimer définitivement le coffre
+/// DELETE /kdbx - supprimer définitivement le coffre
 pub async fn delete_kdbx(
     State(state): State<AppState>,
     Extension(user): Extension<KeeStoreUser>,
@@ -109,7 +109,7 @@ pub async fn delete_kdbx(
     Ok(StatusCode::NO_CONTENT)
 }
 
-/// GET /status — vérifier l'existence du coffre sans le télécharger
+/// GET /status - vérifier l'existence du coffre sans le télécharger
 pub async fn get_status(
     State(state): State<AppState>,
     Extension(user): Extension<KeeStoreUser>,

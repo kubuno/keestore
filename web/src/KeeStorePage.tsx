@@ -60,7 +60,7 @@ function fmtBytes(b: number) {
 }
 
 function fmtDate(s: string | null, lng?: string) {
-  if (!s) return '—'
+  if (!s) return '-'
   return formatDate(new Date(s), 'dateTime')
 }
 
@@ -597,9 +597,9 @@ function VaultView({
       </>}
     >
     <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 min-w-0 min-h-0 overflow-hidden`}>
-      {/* Left — groups + entries (pleine largeur sur mobile, 280px sur desktop) */}
+      {/* Left - groups + entries (pleine largeur sur mobile, 280px sur desktop) */}
       <div className={`flex flex-col border-border flex-shrink-0 ${isMobile ? 'border-b w-full max-h-[45%]' : 'border-r w-[280px]'}`}>
-        {/* Toolbar — recherche d'entrées (la recherche globale est dans la topbar) */}
+        {/* Toolbar - recherche d'entrées (la recherche globale est dans la topbar) */}
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
           <div className="flex-1 relative">
             <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary" />
@@ -664,7 +664,7 @@ function VaultView({
         </div>
       </div>
 
-      {/* Right — detail */}
+      {/* Right - detail */}
       <div className="flex-1 overflow-hidden">
         {selected ? (
           <EntryDetail entry={selected} onClose={() => setSelected(null)} />

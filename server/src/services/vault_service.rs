@@ -48,13 +48,13 @@ pub async fn get_vault_meta(user_id: &Uuid, db: &kubuno_db::DbPool) -> Result<Va
 /// Three things in this statement are not portable, and each is handled by
 /// kubuno-db rather than by hand:
 ///
-/// * **`ON CONFLICT ... DO UPDATE`** — MySQL spells it `ON DUPLICATE KEY
+/// * **`ON CONFLICT ... DO UPDATE`** - MySQL spells it `ON DUPLICATE KEY
 ///   UPDATE` and names the incoming row `VALUES(col)` instead of
 ///   `excluded.col`.
-/// * **`RETURNING`** — MySQL has none, so the helper re-reads the row by its
+/// * **`RETURNING`** - MySQL has none, so the helper re-reads the row by its
 ///   natural key. Both statements run inside the transaction opened here, so a
 ///   concurrent sync cannot slip between them.
-/// * **`NOW()`** — bound from Rust: the three engines spell it differently and
+/// * **`NOW()`** - bound from Rust: the three engines spell it differently and
 ///   SQLite has no time zone at all.
 ///
 /// `id` is generated here and bound explicitly. The PostgreSQL `DEFAULT` is

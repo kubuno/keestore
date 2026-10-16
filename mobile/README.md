@@ -1,4 +1,4 @@
-# Kubuno Keestore — mobile apps
+# Kubuno Keestore - mobile apps
 
 Reserved for the mobile clients of the Keestore module, organised like the other platforms of this repository:
 

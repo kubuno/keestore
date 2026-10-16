@@ -12,7 +12,7 @@ use crate::{
     state::AppState,
 };
 
-/// GET /hibp/:prefix — proxy k-anonymity vers HaveIBeenPwned
+/// GET /hibp/:prefix - proxy k-anonymity vers HaveIBeenPwned
 pub async fn hibp_proxy(
     State(state): State<AppState>,
     Extension(_user): Extension<KeeStoreUser>,
@@ -28,7 +28,7 @@ pub async fn hibp_proxy(
     let prefix = validate_prefix(&prefix)?;
 
     // Prefer the admin-set endpoint, falling back to config.toml when it was
-    // never changed from the compiled default — an install that configured this
+    // never changed from the compiled default - an install that configured this
     // the old way keeps working until an admin edits it in the console.
     let d = crate::config::instance::InstanceConfig::default();
     let api_url = if cfg.hibp_api_url == d.hibp_api_url {

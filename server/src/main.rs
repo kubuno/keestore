@@ -71,7 +71,7 @@ struct SettingDefRaw {
     unit:        Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     placeholder: Option<String>,
-    /// "info" | "warning" | "danger" — how loudly the console warns before a change.
+    /// "info" | "warning" | "danger" - how loudly the console warns before a change.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     risk:        Option<String>,
     /// Folds the setting behind the section's "Avancé" disclosure.
@@ -229,7 +229,7 @@ async fn main() -> Result<()> {
     }
 
     // Storage usage reporter: declares to the core what keestore holds per
-    // account. Started before registration on purpose — its first attempt
+    // account. Started before registration on purpose - its first attempt
     // routinely fails while the core is still coming up, and its backoff is what
     // recovers from that without waiting a whole sync period.
     {
@@ -254,7 +254,7 @@ async fn main() -> Result<()> {
                 match http2.post(&url).header("X-Internal-Secret", secret.as_str()).send().await {
                     Ok(r) if r.status().is_success() => {}
                     Ok(r) if r.status() == reqwest::StatusCode::NOT_FOUND => {
-                        tracing::info!("Heartbeat 404 — ré-enregistrement…");
+                        tracing::info!("Heartbeat 404 - ré-enregistrement…");
                         register_with_core(&http2, &settings2).await;
                     }
                     Ok(r) if r.status() == reqwest::StatusCode::FORBIDDEN => {

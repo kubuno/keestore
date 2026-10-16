@@ -1,5 +1,5 @@
 //! Runs keestore's own migrations and its own vault service against a real
-//! server of **each** engine, from a single compiled binary — the proof that
+//! server of **each** engine, from a single compiled binary - the proof that
 //! the engine is a run-time choice, not a build-time one.
 //!
 //! * SQLite always runs (a temp file, no server).
@@ -64,7 +64,7 @@ async fn migrated_pool(settings: kubuno_db::DbSettings) -> (kubuno_db::DbPool, i
 }
 
 /// The whole vault write path, plus the two-owner conflict, the missing-vault
-/// case and the usage aggregate — everything the handlers exercise.
+/// case and the usage aggregate - everything the handlers exercise.
 async fn full_suite(pool: &kubuno_db::DbPool) {
     // ── the PUT /kdbx path: upsert, version bump, read back, delete ──
     let user = Uuid::new_v4();
